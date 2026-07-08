@@ -20,7 +20,7 @@ function navActive(string $page): string {
 function navActiveDir(string $dir): string {
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $segments = explode('/', trim($path, '/'));
-    return (isset($segments[0]) && $segments[0] === $dir) ? 'active' : '';
+    return in_array($dir, $segments) ? 'active' : '';
 }
 
 function isSectionActive(string $section): bool {

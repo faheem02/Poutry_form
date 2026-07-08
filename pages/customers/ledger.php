@@ -28,17 +28,21 @@ if ($customer) {
     $entries[] = [
         'date'       => '0000-00-00',
         'sort_id'    => 0,
+        'type'       => 'opening',
         'particular' => 'Opening Balance',
+        'chicken_type' => '-',
+        'weight'     => null,
+        'rate'       => null,
         'debit'      => 0,
         'credit'     => 0,
         'balance'    => $running,
     ];
 
-    $salesSql = "SELECT * FROM sales WHERE customer_id = ?";
+    $salesSql = "SELECT s.*, ct.name AS chicken_type_name FROM sales s JOIN chicken_types ct ON ct.id = s.chicken_type_id WHERE s.customer_id = ?";
     $salesParams = [$customer_id];
-    if ($from) { $salesSql .= " AND sale_date >= ?"; $salesParams[] = $from; }
-    if ($to)   { $salesSql .= " AND sale_date <= ?"; $salesParams[] = $to; }
-    $salesSql .= " ORDER BY sale_date, id";
+    if ($from) { $salesSql .= " AND s.sale_date >= ?"; $salesParams[] = $from; }
+    if ($to)   { $salesSql .= " AND s.sale_date <= ?"; $salesParams[] = $to; }
+    $salesSql .= " ORDER BY s.sale_date, s.id";
     $sales = $pdo->prepare($salesSql);
     $sales->execute($salesParams);
     foreach ($sales->fetchAll() as $s) {
@@ -47,25 +51,38 @@ if ($customer) {
             'sort_id'    => (int)$s['id'],
             'type'       => 'sale',
             'particular' => 'Sale Invoice: ' . $s['invoice_no'],
+            'chicken_type' => $s['chicken_type_name'],
+            'weight'     => (float)$s['weight'],
+            'rate'       => (float)$s['rate_per_kg'],
             'debit'      => (float)$s['net_total'],
             'credit'     => 0,
         ];
     }
 
-    $paySql = "SELECT * FROM payments WHERE customer_id = ?";
+    $paySql = "SELECT p.*, s.invoice_no AS against_invoice, s.chicken_type_id, s.weight, s.rate_per_kg, s.birds_count, ct.name AS chicken_type_name
+        FROM payments p
+        LEFT JOIN sales s ON s.id = p.sale_id
+        LEFT JOIN chicken_types ct ON ct.id = s.chicken_type_id
+        WHERE p.customer_id = ?";
     $payParams = [$customer_id];
-    if ($from) { $paySql .= " AND payment_date >= ?"; $payParams[] = $from; }
-    if ($to)   { $paySql .= " AND payment_date <= ?"; $payParams[] = $to; }
-    $paySql .= " ORDER BY payment_date, id";
+    if ($from) { $paySql .= " AND p.payment_date >= ?"; $payParams[] = $from; }
+    if ($to)   { $paySql .= " AND p.payment_date <= ?"; $payParams[] = $to; }
+    $paySql .= " ORDER BY p.payment_date, p.id";
     $payments = $pdo->prepare($paySql);
     $payments->execute($payParams);
     foreach ($payments->fetchAll() as $p) {
         $label = $p['notes'] ? htmlspecialchars($p['notes']) : 'Payment (' . ucfirst($p['payment_method']) . ')';
+        if ($p['against_invoice']) {
+            $label .= ' [Against: ' . $p['against_invoice'] . ']';
+        }
         $entries[] = [
             'date'       => $p['payment_date'],
             'sort_id'    => (int)$p['id'],
             'type'       => 'payment',
             'particular' => $label,
+            'chicken_type' => $p['chicken_type_name'] ?? '-',
+            'weight'     => $p['weight'] !== null ? (float)$p['weight'] : null,
+            'rate'       => $p['rate_per_kg'] !== null ? (float)$p['rate_per_kg'] : null,
             'debit'      => 0,
             'credit'     => (float)$p['amount'],
         ];
@@ -313,7 +330,10 @@ require_once __DIR__ . '/../../includes/header.php';
                 <thead class="table-light">
                     <tr>
                         <th>Date</th>
-                        <th>Particular</th>
+                        <th>Voucher #</th>
+                        <th>Chicken Type</th>
+                        <th class="text-end">Weight (KG)</th>
+                        <th class="text-end">Rate/KG</th>
                         <th class="text-end">Debit (Rs.)</th>
                         <th class="text-end">Credit (Rs.)</th>
                         <th class="text-end">Balance (Rs.)</th>
@@ -321,7 +341,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 </thead>
                 <tbody>
                     <?php if (empty($entries)): ?>
-                    <tr><td colspan="5" class="text-center text-muted py-4">No records found for the selected period.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted py-4">No records found for the selected period.</td></tr>
                     <?php else: ?>
                     <?php foreach ($entries as $e): ?>
                     <tr class="<?= ($e['type'] ?? '') === 'sale' ? 'table-warning' : (($e['type'] ?? '') === 'payment' ? 'table-success' : '') ?>">
@@ -338,6 +358,9 @@ require_once __DIR__ . '/../../includes/header.php';
                             <?php endif; ?>
                             <?= $e['particular'] ?>
                         </td>
+                        <td><?= htmlspecialchars($e['chicken_type'] ?? '-') ?></td>
+                        <td class="text-end"><?= $e['weight'] !== null ? number_format($e['weight'], 3) : '-' ?></td>
+                        <td class="text-end"><?= $e['rate'] !== null ? 'Rs. ' . money($e['rate']) : '-' ?></td>
                         <td class="text-end text-danger fw-bold"><?= $e['debit'] > 0 ? 'Rs. ' . money($e['debit']) : '-' ?></td>
                         <td class="text-end text-success fw-bold"><?= $e['credit'] > 0 ? 'Rs. ' . money($e['credit']) : '-' ?></td>
                         <td class="text-end fw-bold <?= ($e['balance'] ?? 0) > 0 ? 'text-danger' : (($e['balance'] ?? 0) < 0 ? 'text-primary' : 'text-success') ?>">

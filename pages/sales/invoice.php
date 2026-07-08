@@ -30,6 +30,10 @@ if ($sale['customer_id']) {
     $prev_balance = $current_balance - (float)$sale['net_total'] + (float)$sale['paid_amount'];
 }
 
+// Weight breakdown: 1 Man = 40 KG
+$totalKg  = (float)$sale['weight'];
+$totalMan = $totalKg / 40;
+
 $page_title = 'Invoice - ' . $sale['invoice_no'];
 ?>
 <!DOCTYPE html>
@@ -88,18 +92,18 @@ $page_title = 'Invoice - ' . $sale['invoice_no'];
                     <thead class="table-light">
                         <tr>
                             <th>Chicken Type</th>
-                            <th class="text-center">Qty</th>
-                            <th class="text-end">Rate/KG</th>
+                            <th class="text-end">Weight (Man)</th>
                             <th class="text-end">Weight (KG)</th>
+                            <th class="text-end">Rate/KG</th>
                             <th class="text-end">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><?= htmlspecialchars($sale['chicken_type']) ?></td>
-                            <td class="text-center fw-bold"><?= (int)$sale['birds_count'] ?></td>
+                            <td class="text-end fw-bold"><?= number_format($totalMan, 3) ?></td>
+                            <td class="text-end"><?= number_format($totalKg, 3) ?></td>
                             <td class="text-end">Rs. <?= money($sale['rate_per_kg']) ?></td>
-                            <td class="text-end"><?= number_format($sale['weight'], 3) ?></td>
                             <td class="text-end">Rs. <?= money($sale['amount']) ?></td>
                         </tr>
                     </tbody>

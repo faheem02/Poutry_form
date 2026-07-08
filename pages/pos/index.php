@@ -30,7 +30,10 @@ require_once __DIR__ . '/../../includes/header.php';
                 <form id="saleForm">
                     <input type="hidden" name="csrf_token" id="csrf_token" value="<?= csrf_token() ?>">
                     <input type="hidden" name="customer_id" value="">
-                    <input type="hidden" name="sale_date" id="sale_date" value="<?= date('Y-m-d') ?>">
+                    <div class="col-md-4">
+    <label class="form-label small fw-bold">Sale Date</label>
+    <input type="date" name="sale_date" id="sale_date" class="form-control" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+</div>
 
                     <div class="row g-3">
                         <!-- Chicken Type -->
@@ -50,7 +53,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <!-- Rate Per KG -->
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Rate Per KG (Rs.)</label>
-                            <input type="number" name="rate_per_kg" id="rate_per_kg" class="form-control form-control-lg fw-bold" step="0.01" min="0" readonly placeholder="Auto-loads">
+                            <input type="number" name="rate_per_kg" id="rate_per_kg" class="form-control form-control-lg fw-bold" step="0.01" min="0" placeholder="Auto-loads">
                         </div>
 
                         <!-- Payment Method -->
@@ -64,16 +67,35 @@ require_once __DIR__ . '/../../includes/header.php';
                         </div>
 
                         <!-- Quantity (Birds) -->
-                        <div class="col-md-4">
+                        <!-- <div class="col-md-4">
                             <label class="form-label small fw-bold"> (Quantity)</label>
                             <input type="number" name="birds_count" id="birds_count" class="form-control form-control-lg" min="0" step="1" placeholder="0">
-                        </div>
+                        </div> -->
 
                         <!-- Weight -->
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">Weight (KG)</label>
-                            <input type="number" name="weight" id="weight" class="form-control form-control-lg" step="0.001" min="0" placeholder="0.000">
-                        </div>
+<!-- Weight in Man -->
+<div class="col-md-4">
+    <label class="form-label small fw-bold">Weight (Man)</label>
+    <input type="number" name="weight_man" id="weight_man" class="form-control form-control-lg" step="0.01" min="0" placeholder="0">
+</div>
+
+<!-- Weight in KG (extra) -->
+<div class="col-md-4">
+    <label class="form-label small fw-bold">Weight (KG)</label>
+    <input type="number" name="weight_kg_extra" id="weight_kg_extra" class="form-control form-control-lg" step="0.001" min="0" placeholder="0.000">
+</div>
+
+<!-- Total Net Weight in Man (auto) -->
+<div class="col-md-4">
+    <label class="form-label small fw-bold">Total Net Weight (Man)</label>
+    <input type="text" id="total_weight_man" class="form-control form-control-lg fw-bold bg-light" readonly value="0.000">
+</div>
+
+<!-- Total Net Weight in KG (auto) -->
+<div class="col-md-4">
+    <label class="form-label small fw-bold">Total Net Weight (KG)</label>
+    <input type="text" name="weight" id="weight" class="form-control form-control-lg fw-bold bg-light" readonly value="0.000">
+</div>
 
                         <!-- Amount -->
                         <div class="col-md-4">
@@ -182,6 +204,22 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <script src="<?= BASE_URL ?>/assets/js/pos.js"></script>
 <script>
+    // Auto-calculate Total Net Weight (Man & KG)
+function calculateTotalWeight() {
+    const man = parseFloat($('#weight_man').val()) || 0;
+    const kg  = parseFloat($('#weight_kg_extra').val()) || 0;
+
+    const totalKg = (man * 40) + kg;       // 1 Man = 40 KG
+    const totalMan = totalKg / 40;
+
+    $('#weight').val(totalKg.toFixed(3));           // hidden/total KG field used by pos.js for amount calc
+    $('#total_weight_man').val(totalMan.toFixed(3));
+
+    $('#weight').trigger('input');  // taake pos.js ka existing amount-calculation trigger ho jaye
+}
+
+$('#weight_man, #weight_kg_extra').on('input', calculateTotalWeight);
+
 // Load today's rates sidebar
 $.get(BASE_URL + '/pages/pos/pos_ajax.php', { action: 'today_rates' }, function (res) {
     if (res.length) {

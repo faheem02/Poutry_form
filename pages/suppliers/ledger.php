@@ -31,6 +31,9 @@ if ($supplier) {
         'date'    => '0000-00-00',
         'id'      => 0,
         'ref'     => 'Opening Balance',
+        'birds'   => null,
+        'weight'  => null,
+        'rate'    => null,
         'debit'   => $running,
         'credit'  => 0,
         'balance' => $running,
@@ -54,6 +57,8 @@ if ($supplier) {
             'id'      => $p['id'],
             'ref'     => $p['invoice_no'] ?? '-',
             'birds'   => (int)$p['total_birds'],
+            'weight'  => (float)$p['total_weight'],
+            'rate'    => (float)$p['purchase_rate'],
             'debit'   => (float)$p['total_cost'],
             'credit'  => 0,
             'details' => money($p['total_weight']) . ' kg @ Rs. ' . money($p['purchase_rate']) . '/kg',
@@ -62,20 +67,30 @@ if ($supplier) {
     }
 
     // Fetch payments with date filter
-    $paySql = "SELECT * FROM supplier_payments WHERE supplier_id = ?";
+    $paySql = "SELECT sp.*, p.invoice_no AS purchase_invoice, p.total_birds, p.total_weight, p.purchase_rate, p.total_cost
+        FROM supplier_payments sp
+        LEFT JOIN purchases p ON p.id = sp.purchase_id
+        WHERE sp.supplier_id = ?";
     $payParams = [$supplier_id];
-    if ($from) { $paySql .= " AND payment_date >= ?"; $payParams[] = $from; }
-    if ($to)   { $paySql .= " AND payment_date <= ?"; $payParams[] = $to; }
-    $paySql .= " ORDER BY payment_date, id";
+    if ($from) { $paySql .= " AND sp.payment_date >= ?"; $payParams[] = $from; }
+    if ($to)   { $paySql .= " AND sp.payment_date <= ?"; $payParams[] = $to; }
+    $paySql .= " ORDER BY sp.payment_date, sp.id";
     $payments = $pdo->prepare($paySql);
     $payments->execute($payParams);
     foreach ($payments as $p) {
         $total_payments += (float)$p['amount'];
+        $label = $p['notes'] ? htmlspecialchars($p['notes']) : 'Payment (' . ucfirst($p['payment_method']) . ')';
+        if ($p['purchase_invoice']) {
+            $label .= ' [Against: ' . $p['purchase_invoice'] . ']';
+        }
         $entries[] = [
             'type'    => 'payment',
             'date'    => $p['payment_date'],
             'id'      => $p['id'],
-            'ref'     => 'Payment',
+            'ref'     => $label,
+            'birds'   => $p['total_birds'] !== null ? (int)$p['total_birds'] : null,
+            'weight'  => $p['total_weight'] !== null ? (float)$p['total_weight'] : null,
+            'rate'    => $p['purchase_rate'] !== null ? (float)$p['purchase_rate'] : null,
             'debit'   => 0,
             'credit'  => (float)$p['amount'],
             'details' => 'Paid via ' . ucfirst($p['payment_method']),
@@ -308,31 +323,44 @@ require_once __DIR__ . '/../../includes/header.php';
                 <thead class="table-light">
                     <tr>
                         <th>Date</th>
-                        <th>Reference</th>
+                        <th>Voucher #</th>
                         <th class="text-center">Birds</th>
-                        <th>Details</th>
-                        <th class="text-end">Credit (Rs.)</th>
+                        <th class="text-end">Weight (KG)</th>
+                        <th class="text-end">Rate/KG</th>
+                        <th>Details / Notes</th>
                         <th class="text-end">Debit (Rs.)</th>
+                        <th class="text-end">Credit (Rs.)</th>
                         <th class="text-end">Balance (Rs.)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($entries)): ?>
-                    <tr><td colspan="7" class="text-center text-muted py-4">No records found for the selected period.</td></tr>
+                    <tr><td colspan="9" class="text-center text-muted py-4">No records found for the selected period.</td></tr>
                     <?php else: ?>
                     <?php foreach ($entries as $e): ?>
-                    <tr class="<?= $e['type'] === 'opening' ? 'table-secondary' : ($e['type'] === 'purchase' ? '' : '') ?>">
+                    <tr class="<?= $e['type'] === 'opening' ? 'table-secondary' : ($e['type'] === 'payment' ? 'table-success' : '') ?>">
                         <td><?= $e['date'] === '0000-00-00' ? '<span class="text-muted">—</span>' : date('d M Y', strtotime($e['date'])) ?></td>
                         <td>
                             <?php if ($e['type'] === 'purchase'): ?>
+                            <i class="fas fa-shopping-cart text-primary me-1"></i>
                             <a href="<?= BASE_URL ?>/pages/purchases/view.php?id=<?= $e['id'] ?>" target="_blank"><?= htmlspecialchars($e['ref']) ?></a>
+                            <?php elseif ($e['type'] === 'payment'): ?>
+                            <i class="fas fa-money-bill-wave text-success me-1"></i>
+                            <span><?= htmlspecialchars($e['ref']) ?></span>
                             <?php else: ?>
+                            <i class="fas fa-balance-scale text-secondary me-1"></i>
                             <span class="text-muted"><?= htmlspecialchars($e['ref']) ?></span>
                             <?php endif; ?>
                         </td>
-                        <td class="text-center fw-bold"><?= ($e['type'] ?? '') === 'purchase' ? (isset($e['birds']) ? $e['birds'] : '-') : '-' ?></td>
+                        <td class="text-center fw-bold"><?= $e['birds'] !== null ? $e['birds'] : '-' ?></td>
+                        <td class="text-end"><?= $e['weight'] !== null ? number_format($e['weight'], 3) : '-' ?></td>
+                        <td class="text-end"><?= $e['rate'] !== null ? 'Rs. ' . money($e['rate']) : '-' ?></td>
                         <td>
-                            <?= htmlspecialchars($e['details']) ?>
+                            <?php if ($e['type'] === 'purchase'): ?>
+                                <span class="text-muted small"><?= htmlspecialchars($e['details']) ?></span>
+                            <?php elseif ($e['type'] === 'payment'): ?>
+                                <span class="text-muted small"><?= htmlspecialchars($e['details']) ?></span>
+                            <?php endif; ?>
                             <?php if ($e['notes']): ?>
                             <br><small class="text-muted"><i class="fas fa-comment me-1"></i> <?= htmlspecialchars($e['notes']) ?></small>
                             <?php endif; ?>
@@ -346,7 +374,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 </tbody>
                 <tfoot class="table-light">
                     <tr>
-                        <th colspan="4" class="text-end">Totals</th>
+                        <th colspan="6" class="text-end">Totals</th>
                         <th class="text-end text-danger fw-bold">Rs. <?= money((float)($supplier['opening_balance'] ?? 0) + $total_purchases) ?></th>
                         <th class="text-end text-success fw-bold">Rs. <?= money($total_payments) ?></th>
                         <th class="text-end <?= $balance > 0 ? 'text-danger' : 'text-success' ?> fw-bold">Rs. <?= money($balance) ?></th>

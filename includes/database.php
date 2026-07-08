@@ -2,14 +2,21 @@
 
 date_default_timezone_set('Asia/Karachi');
 
+// ===== CLIENT: Alwahab Poultry (live) =====
 // define('DB_HOST', 'localhost');
 // define('DB_NAME', 'atrmarke_alwahab');
 // define('DB_USER', 'atrmarke_alwahab');
 // define('DB_PASS', 'ATRsales123');
 
+// ===== CLIENT: Poultry Form (live) =====
+// define('DB_HOST', 'localhost');
+// define('DB_NAME', 'poultry_form');
+// define('DB_USER', 'poultry_form_user');
+// define('DB_PASS', 'password_here');
 
+// ===== LOCAL DEV =====
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'poultry_shop');
+define('DB_NAME', 'poultry_form');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 require_once __DIR__ . '/base_url.php';

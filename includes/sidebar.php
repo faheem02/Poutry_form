@@ -118,6 +118,7 @@ $expanded  = function($exp) { return $exp ? 'true' : 'false'; };
                     <a style="color:#000;" class="collapse-item <?= basename($_SERVER['PHP_SELF']) === 'summary.php' && strpos($_SERVER['REQUEST_URI'], '/stock/') ? 'active' : '' ?>" href="<?= BASE_URL ?>/pages/stock/summary.php">Stock Summary</a>
                     <a style="color:#000;" class="collapse-item <?= basename($_SERVER['PHP_SELF']) === 'index.php' && strpos($_SERVER['REQUEST_URI'], '/stock/') ? 'active' : '' ?>" href="<?= BASE_URL ?>/pages/stock/index.php">Stock Ledger</a>
                     <a style="color:#000;" class="collapse-item <?= basename($_SERVER['PHP_SELF']) === 'manage.php' && strpos($_SERVER['REQUEST_URI'], '/stock/') ? 'active' : '' ?>" href="<?= BASE_URL ?>/pages/stock/manage.php">Management</a>
+                    <a style="color:#000;" class="collapse-item <?= basename($_SERVER['PHP_SELF']) === 'adjustment_history.php' && strpos($_SERVER['REQUEST_URI'], '/stock/') ? 'active' : '' ?>" href="<?= BASE_URL ?>/pages/stock/adjustment_history.php">Adjustment History</a>
                 </div>
             </div>
         </li>

@@ -3,7 +3,7 @@
 -- Database Schema + Seed Data
 -- ============================================
 
-CREATE DATABASE IF NOT EXISTS poultry_shop
+CREATE DATABASE IF NOT EXISTS poultry_form
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE poultry_shop;

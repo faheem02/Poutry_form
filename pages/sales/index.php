@@ -191,7 +191,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <th>Date</th>
                         <th>Customer</th>
                         <th>Chicken Type</th>
-                        <th>Qty</th>
+                        <th>Weight (Man)</th>
                         <th>Weight (kg)</th>
                         <th>Rate (Rs.)</th>
                         <th>Total (Rs.)</th>
@@ -208,7 +208,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <td><?= date('d M Y', strtotime($s['sale_date'])) ?></td>
                         <td><?= htmlspecialchars($s['customer_name'] ?? 'Walk-in') ?></td>
                         <td><span class="badge bg-info bg-opacity-10 text-info"><?= htmlspecialchars($s['chicken_type']) ?></span></td>
-                        <td class="fw-semibold text-center"><?= (int)$s['birds_count'] ?></td>
+                        <td class="fw-semibold text-center"><?= number_format($s['weight'] / 40, 3) ?></td>
                         <td><?= number_format($s['weight'], 3) ?></td>
                         <td><?= money($s['rate_per_kg']) ?></td>
                         <td class="fw-semibold"><?= money($s['net_total']) ?></td>

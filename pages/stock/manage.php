@@ -12,25 +12,25 @@ $types = $pdo->query("SELECT id, name FROM chicken_types ORDER BY name")->fetchA
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action_type    = $_POST['action_type'] ?? ''; // 'opening' or 'adjustment'
     $chicken_type_id = (int)($_POST['chicken_type_id'] ?? 0);
-    $birds_count    = (int)($_POST['birds_count'] ?? 0);
+    // $birds_count    = (int)($_POST['birds_count'] ?? 0);
     $weight_kg      = (float)($_POST['weight_kg'] ?? 0);
     $rate_per_kg    = (float)($_POST['rate_per_kg'] ?? 0);
     $amount         = (float)($_POST['amount'] ?? 0);
     $adjust_date    = $_POST['adjust_date'] ?? date('Y-m-d');
     $notes          = sanitize($_POST['notes'] ?? '');
 
-    if (!$chicken_type_id || $weight_kg <= 0) {
-        setFlash('Chicken type and weight are required.');
+    if (!$chicken_type_id || $weight_kg == 0 || ($action_type === 'opening' && $weight_kg < 0)) {
+    setFlash('Chicken type and valid weight are required.');
     } else {
         $amount = $amount ?: ($rate_per_kg * $weight_kg);
         $trans_type = $action_type === 'opening' ? 'opening' : 'adjustment';
 
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO stock_ledger (transaction_date, transaction_type, chicken_type_id, birds_count, weight_kg, rate_per_kg, amount, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO stock_ledger (transaction_date, transaction_type, chicken_type_id, weight_kg, rate_per_kg, amount, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$adjust_date, $trans_type, $chicken_type_id, $birds_count, $weight_kg, $rate_per_kg, $amount, $notes]);
+            $stmt->execute([$adjust_date, $trans_type, $chicken_type_id, $weight_kg, $rate_per_kg, $amount, $notes]);
             setFlash('Stock ' . ($action_type === 'opening' ? 'opening' : 'adjustment') . ' added successfully.');
             header('Location: summary.php');
             exit;
@@ -76,10 +76,7 @@ require_once __DIR__ . '/../../includes/header.php';
                             <label class="form-label small fw-bold">Date</label>
                             <input type="date" name="adjust_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">Birds Count</label>
-                            <input type="number" name="birds_count" class="form-control" min="0" step="1" value="0">
-                        </div>
+                    
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Weight (KG)</label>
                             <input type="number" name="weight_kg" class="form-control" step="0.001" min="0" required>
@@ -129,10 +126,7 @@ require_once __DIR__ . '/../../includes/header.php';
                             <label class="form-label small fw-bold">Date</label>
                             <input type="date" name="adjust_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">Birds (+/-)</label>
-                            <input type="number" name="birds_count" class="form-control" step="1" value="0" placeholder="+5 or -3">
-                        </div>
+                       
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Weight (+/- KG)</label>
                             <input type="number" name="weight_kg" class="form-control" step="0.001" required placeholder="+10 or -5">

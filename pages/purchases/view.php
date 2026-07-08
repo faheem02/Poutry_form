@@ -62,7 +62,6 @@ require_once __DIR__ . '/../../includes/header.php';
             <div class="card-header">Purchase Details</div>
             <div class="card-body">
                 <table class="table table-sm mb-0">
-                    <tr><td class="fw-bold">Quantity</td><td><?= $purchase['total_birds'] ?></td></tr>
                     <tr><td class="fw-bold">Total Weight</td><td><?= number_format($purchase['total_weight'], 2) ?> KG</td></tr>
                     <tr><td class="fw-bold">Purchase Rate</td><td>Rs. <?= money($purchase['purchase_rate']) ?>/KG</td></tr>
                     <tr class="table-active"><td class="fw-bold">Total Cost</td><td class="fw-bold">Rs. <?= money($purchase['total_cost']) ?></td></tr>

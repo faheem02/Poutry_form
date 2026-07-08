@@ -1,7 +1,6 @@
 $(document).ready(function () {
 
     let currentRate = 0;
-    let currentChickenTypeId = 0;
 
     // ---------------------- TWO-WAY CALCULATOR ----------------------
     const $rateInput    = $('#rate_per_kg');
@@ -12,8 +11,13 @@ $(document).ready(function () {
     const $paidInput    = $('#paid_amount');
     const $balanceEl    = $('#balance');
 
+    function rateKg() {
+        return (parseFloat($rateInput.val()) || 0) / 40;
+    }
+
     function recalculate() {
-        const rate     = parseFloat($rateInput.val()) || 0;
+        const rateKg_ = rateKg();
+        const rateMan = parseFloat($rateInput.val()) || 0;
         const weight   = parseFloat($weightInput.val()) || 0;
         const amount   = parseFloat($amountInput.val()) || 0;
         const discount = parseFloat($discountInput.val()) || 0;
@@ -21,8 +25,8 @@ $(document).ready(function () {
 
         let netTotal = 0;
 
-        if (rate > 0 && weight > 0) {
-            netTotal = (weight * rate) - discount;
+        if (rateKg_ > 0 && weight > 0) {
+            netTotal = (weight * rateKg_) - discount;
         } else if (amount > 0) {
             netTotal = amount - discount;
         }
@@ -35,21 +39,17 @@ $(document).ready(function () {
         $balanceEl.text('Rs. ' + balance.toFixed(2));
 
         // Update sidebar summary
-        $('#display_rate').text(rate.toFixed(2));
+        $('#display_rate').text(rateMan.toFixed(2));
         $('#display_weight').text(weight.toFixed(3));
         $('#display_amount').text(netTotal.toFixed(2));
-        $('#display_birds').text(parseInt($('#birds_count').val()) || 0);
     }
-
-    // Birds count changed -> update sidebar
-    $('#birds_count').on('input', recalculate);
 
     // Weight changed -> calculate and fill Amount
     $weightInput.on('input', function () {
-        const rate   = parseFloat($rateInput.val()) || 0;
+        const rateKg_ = rateKg();
         const weight = parseFloat(this.value) || 0;
-        if (rate > 0 && weight > 0) {
-            $amountInput.val((weight * rate).toFixed(2));
+        if (rateKg_ > 0 && weight > 0) {
+            $amountInput.val((weight * rateKg_).toFixed(2));
         } else {
             $amountInput.val('');
         }
@@ -58,10 +58,10 @@ $(document).ready(function () {
 
     // Amount changed -> calculate and fill Weight
     $amountInput.on('input', function () {
-        const rate   = parseFloat($rateInput.val()) || 0;
+        const rateKg_ = rateKg();
         const amount = parseFloat(this.value) || 0;
-        if (rate > 0 && amount > 0) {
-            $weightInput.val((amount / rate).toFixed(3));
+        if (rateKg_ > 0 && amount > 0) {
+            $weightInput.val((amount / rateKg_).toFixed(3));
         } else {
             $weightInput.val('');
         }
@@ -71,13 +71,13 @@ $(document).ready(function () {
     // Rate changed -> if weight is already filled, recalculate amount;
     // if amount is filled but no weight, recalculate weight
     $rateInput.on('input', function () {
-        const rate   = parseFloat(this.value) || 0;
+        const rateKg_ = rateKg();
         const weight = parseFloat($weightInput.val()) || 0;
         const amount = parseFloat($amountInput.val()) || 0;
-        if (rate > 0 && weight > 0) {
-            $amountInput.val((weight * rate).toFixed(2));
-        } else if (rate > 0 && amount > 0) {
-            $weightInput.val((amount / rate).toFixed(3));
+        if (rateKg_ > 0 && weight > 0) {
+            $amountInput.val((weight * rateKg_).toFixed(2));
+        } else if (rateKg_ > 0 && amount > 0) {
+            $weightInput.val((amount / rateKg_).toFixed(3));
         }
         recalculate();
     });
@@ -101,7 +101,6 @@ $(document).ready(function () {
             $('#stockInfo').text('').hide();
             return;
         }
-        currentChickenTypeId = chickenTypeId;
         $.ajax({
             url: BASE_URL + '/pages/pos/pos_ajax.php',
             method: 'GET',
@@ -109,11 +108,10 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (res) {
                 // Always update stock info regardless of rate
-                const birds  = parseInt(res.birds) || 0;
                 const weight = parseFloat(res.weight) || 0;
                 const $info  = $('#stockInfo');
 
-                $info.text('Available: ' + birds + ' birds / ' + weight.toFixed(2) + ' KG');
+                $info.text('Available: ' + weight.toFixed(2) + ' KG');
                 $info.removeClass('text-danger text-muted text-success');
                 if (weight <= 0) {
                     $info.addClass('text-danger');
@@ -124,21 +122,21 @@ $(document).ready(function () {
 
                 // Store on the selected option so weight validation can read it
                 $('#chicken_type_id').find(':selected')
-                    .data('stock-birds', birds)
                     .data('stock-weight', weight);
 
                 if (res.success) {
-                    currentRate = parseFloat(res.rate);
-                    $rateInput.val(currentRate.toFixed(2));
+                    currentRate = parseFloat(res.rate); // per-KG from server
+                    const rateMan = currentRate * 40;
+                    $rateInput.val(rateMan.toFixed(2));
                     const w = parseFloat($weightInput.val()) || 0;
                     const a = parseFloat($amountInput.val()) || 0;
-                    if (w > 0) {
+                    if (currentRate > 0 && w > 0) {
                         $amountInput.val((w * currentRate).toFixed(2));
-                    } else if (a > 0) {
+                    } else if (currentRate > 0 && a > 0) {
                         $weightInput.val((a / currentRate).toFixed(3));
                     }
                     recalculate();
-                    $('#display_rate').text(currentRate.toFixed(2));
+                    $('#display_rate').text(rateMan.toFixed(2));
                 } else {
                     $rateInput.val('');
                     showError('No rate set for today for this chicken type. Please set a rate first.');
@@ -218,8 +216,7 @@ $(document).ready(function () {
             csrf_token: $('#csrf_token').val(),
             customer_id: $('#customer_id').val(),
             chicken_type_id: $('#chicken_type_id').val(),
-            rate_per_kg: $rateInput.val(),
-            birds_count: $('#birds_count').val() || 0,
+            rate_per_kg: rateKg() || 0,
             weight: $weightInput.val(),
             amount: $amountInput.val(),
             discount: $discountInput.val() || 0,
@@ -276,7 +273,6 @@ $(document).ready(function () {
 
     // ---------------------- RESET POS ----------------------
     function resetPOS() {
-        $('#birds_count').val('');
         $weightInput.val('');
         $amountInput.val('');
         $discountInput.val('0');

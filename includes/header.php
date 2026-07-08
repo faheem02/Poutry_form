@@ -163,10 +163,9 @@
 <?php date_default_timezone_set('Asia/Karachi'); ?>
 
 <div class="print-header">
-    <h2>Alwahab Poultry</h2>
-    <p>Add Qazia wah pul near Press club badin</p>
-    <p>Prop Sajid Wahla &bull; Manger Asif Memon</p>
-    <p>+92 333 2528003</p>
+    <h2>Ismail's Poultry Services</h2>
+    <p>Near Fruit Mandi Talagang Road Chakwal</p>
+    <p>0336 7507535</p>
 </div>
 
 <div id="wrapper">

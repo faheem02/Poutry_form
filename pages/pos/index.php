@@ -44,16 +44,16 @@ require_once __DIR__ . '/../../includes/header.php';
                                 <?php foreach ($types as $t):
                                     $stock = availableStock($t['id']);
                                 ?>
-                                <option value="<?= $t['id'] ?>" data-stock-birds="<?= (int)$stock['birds'] ?>" data-stock-weight="<?= (float)$stock['weight'] ?>"><?= htmlspecialchars($t['name']) ?></option>
+                                <option value="<?= $t['id'] ?>" data-stock-weight="<?= (float)$stock['weight'] ?>"><?= htmlspecialchars($t['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <small class="text-muted" id="stockInfo"></small>
                         </div>
 
-                        <!-- Rate Per KG -->
+                        <!-- Rate Per Man -->
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">Rate Per KG (Rs.)</label>
-                            <input type="number" name="rate_per_kg" id="rate_per_kg" class="form-control form-control-lg fw-bold" step="0.01" min="0" placeholder="Auto-loads">
+                            <label class="form-label small fw-bold">Rate Per Man (Rs.)</label>
+                            <input type="number" name="rate_per_kg" id="rate_per_kg" class="form-control fw-bold" step="0.01" min="0" placeholder="Auto-loads">
                         </div>
 
                         <!-- Payment Method -->
@@ -66,41 +66,35 @@ require_once __DIR__ . '/../../includes/header.php';
                             </select>
                         </div>
 
-                        <!-- Quantity (Birds) -->
-                        <!-- <div class="col-md-4">
-                            <label class="form-label small fw-bold"> (Quantity)</label>
-                            <input type="number" name="birds_count" id="birds_count" class="form-control form-control-lg" min="0" step="1" placeholder="0">
-                        </div> -->
-
                         <!-- Weight -->
 <!-- Weight in Man -->
 <div class="col-md-4">
     <label class="form-label small fw-bold">Weight (Man)</label>
-    <input type="number" name="weight_man" id="weight_man" class="form-control form-control-lg" step="0.01" min="0" placeholder="0">
+    <input type="number" name="weight_man" id="weight_man" class="form-control" step="0.01" min="0" placeholder="0">
 </div>
 
 <!-- Weight in KG (extra) -->
 <div class="col-md-4">
     <label class="form-label small fw-bold">Weight (KG)</label>
-    <input type="number" name="weight_kg_extra" id="weight_kg_extra" class="form-control form-control-lg" step="0.001" min="0" placeholder="0.000">
+    <input type="number" name="weight_kg_extra" id="weight_kg_extra" class="form-control" step="0.001" min="0" placeholder="0.000">
 </div>
 
 <!-- Total Net Weight in Man (auto) -->
 <div class="col-md-4">
     <label class="form-label small fw-bold">Total Net Weight (Man)</label>
-    <input type="text" id="total_weight_man" class="form-control form-control-lg fw-bold bg-light" readonly value="0.000">
+    <input type="text" id="total_weight_man" class="form-control fw-bold bg-light" readonly value="0.000">
 </div>
 
 <!-- Total Net Weight in KG (auto) -->
 <div class="col-md-4">
     <label class="form-label small fw-bold">Total Net Weight (KG)</label>
-    <input type="text" name="weight" id="weight" class="form-control form-control-lg fw-bold bg-light" readonly value="0.000">
+    <input type="text" name="weight" id="weight" class="form-control fw-bold bg-light" readonly value="0.000">
 </div>
 
                         <!-- Amount -->
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Amount (Rs.)</label>
-                            <input type="number" name="amount" id="amount" class="form-control form-control-lg" step="0.01" min="0" placeholder="0.00">
+                            <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="0" placeholder="0.00">
                         </div>
 
                         <!-- Discount -->
@@ -114,7 +108,7 @@ require_once __DIR__ . '/../../includes/header.php';
                             <label class="form-label small fw-bold">Net Total</label>
                             <div class="input-group">
                                 <span class="input-group-text">Rs.</span>
-                                <span class="form-control form-control-lg fw-bold text-primary" id="net_total">0.00</span>
+                                <span class="form-control fw-bold text-primary" id="net_total">0.00</span>
                             </div>
                         </div>
 
@@ -123,14 +117,14 @@ require_once __DIR__ . '/../../includes/header.php';
                             <label class="form-label small fw-bold">Balance</label>
                             <div class="input-group">
                                 <span class="input-group-text">Rs.</span>
-                                <span class="form-control form-control-lg fw-bold text-danger" id="balance">0.00</span>
+                                <span class="form-control fw-bold text-danger" id="balance">0.00</span>
                             </div>
                         </div>
 
                         <!-- Paid Amount -->
                         <div class="col-md-6 credit-sensitive">
                             <label class="form-label small fw-bold">Paid Amount (Rs.)</label>
-                            <input type="number" name="paid_amount" id="paid_amount" class="form-control form-control-lg" step="0.01" min="0" value="0">
+                            <input type="number" name="paid_amount" id="paid_amount" class="form-control" step="0.01" min="0" value="0">
                         </div>
 
                         <!-- Customer -->
@@ -152,19 +146,15 @@ require_once __DIR__ . '/../../includes/header.php';
         <div class="card border-start-primary mb-3">
             <div class="card-body py-3">
                 <div class="row text-center">
-                    <div class="col-3">
-                        <div class="text-xs fw-bold text-warning text-uppercase">Quantity</div>
-                        <div class="h5 mb-0 fw-bold" id="display_birds">0</div>
-                    </div>
-                    <div class="col-3">
-                        <div class="text-xs fw-bold text-primary text-uppercase">Rate/KG</div>
+                    <div class="col-4">
+                        <div class="text-xs fw-bold text-primary text-uppercase">Rate/Man</div>
                         <div class="h5 mb-0 fw-bold" id="display_rate">0.00</div>
                     </div>
-                    <div class="col-3">
-                        <div class="text-xs fw-bold text-success text-uppercase">Weight</div>
+                    <div class="col-4">
+                        <div class="text-xs fw-bold text-success text-uppercase">Weight (KG)</div>
                         <div class="h5 mb-0 fw-bold" id="display_weight">0.000</div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="text-xs fw-bold text-info text-uppercase">Amount</div>
                         <div class="h5 mb-0 fw-bold" id="display_amount">0.00</div>
                     </div>
@@ -202,7 +192,7 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<script src="<?= BASE_URL ?>/assets/js/pos.js"></script>
+<script src="<?= BASE_URL ?>/assets/js/pos.js?v=<?= filemtime(__DIR__ . '/../../assets/js/pos.js') ?>"></script>
 <script>
     // Auto-calculate Total Net Weight (Man & KG)
 function calculateTotalWeight() {
@@ -225,7 +215,7 @@ $.get(BASE_URL + '/pages/pos/pos_ajax.php', { action: 'today_rates' }, function 
     if (res.length) {
         let html = '';
         res.forEach(function (r) {
-            html += '<div class="d-flex justify-content-between"><span>' + r.name + '</span><span class="fw-bold text-primary">Rs. ' + parseFloat(r.rate).toFixed(2) + '</span></div>';
+            html += '<div class="d-flex justify-content-between"><span>' + r.name + '</span><span class="fw-bold text-primary">Rs. ' + (parseFloat(r.rate) * 40).toFixed(2) + '</span></div>';
         });
         $('#todayRates').html(html);
     }

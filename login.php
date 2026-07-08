@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="login-icon mb-2">
                             <i class="fas fa-drumstick-bite"></i>
                         </div>
-                        <h4 class="text-gray-800 fw-bold">AL WAHAB POULTRY</h4>
+                        <h4 class="text-gray-800 fw-bold">ISMAIL'S POULTRY SERVICES</h4>
                         <p class="text-muted small">Sign in to your account</p>
                     </div>
                     <div class="card-body p-4 pt-0">

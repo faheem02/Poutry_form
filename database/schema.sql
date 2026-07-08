@@ -6,7 +6,7 @@
 CREATE DATABASE IF NOT EXISTS poultry_form
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE poultry_shop;
+USE poultry_form;
 
 -- -------------------------------------------
 -- 1. users

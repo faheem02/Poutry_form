@@ -2,11 +2,11 @@
 
 date_default_timezone_set('Asia/Karachi');
 
-// ===== CLIENT: Alwahab Poultry (live) =====
+// ===== CLIENT: Ismail's Poultry Services (live) =====
 // define('DB_HOST', 'localhost');
-// define('DB_NAME', 'atrmarke_alwahab');
-// define('DB_USER', 'atrmarke_alwahab');
-// define('DB_PASS', 'ATRsales123');
+// define('DB_NAME', 'ismail_poultry');
+// define('DB_USER', 'ismail_poultry');
+// define('DB_PASS', 'password_here');
 
 // ===== CLIENT: Poultry Form (live) =====
 // define('DB_HOST', 'localhost');

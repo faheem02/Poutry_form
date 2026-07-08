@@ -12,7 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     if ($_POST['action'] === 'save') {
         $chicken_type_id = (int)$_POST['chicken_type_id'];
-        $rate_per_kg     = (float)$_POST['rate_per_kg'];
+        $rate_per_man    = (float)$_POST['rate_per_man'];
+        $rate_per_kg     = $rate_per_man / 40;
         $rate_date       = $_POST['rate_date'] ?: date('Y-m-d');
 
         if ($chicken_type_id && $rate_per_kg > 0) {
@@ -28,7 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     } elseif ($_POST['action'] === 'update') {
         $id          = (int)$_POST['id'];
-        $rate_per_kg = (float)$_POST['rate_per_kg'];
+        $rate_per_man = (float)$_POST['rate_per_man'];
+        $rate_per_kg = $rate_per_man / 40;
         $rate_date   = $_POST['rate_date'] ?: date('Y-m-d');
         if ($id && $rate_per_kg > 0) {
             $stmt = $pdo->prepare("UPDATE chicken_rates SET rate_per_kg = ?, rate_date = ?, created_by = ? WHERE id = ?");
@@ -343,8 +345,8 @@ require_once __DIR__ . '/../../includes/header.php';
                             <span class="status-badge set"><i class="fas fa-check-circle me-1"></i> Set</span>
                             <div class="chicken-icon"><i class="fas fa-drumstick"></i></div>
                             <div class="chicken-name"><?= htmlspecialchars($t['name']) ?></div>
-                            <div class="rate-value">Rs. <?= money($today_rates[$t['id']]['rate_per_kg']) ?></div>
-                            <div class="rate-label">per KG</div>
+                            <div class="rate-value">Rs. <?= money($today_rates[$t['id']]['rate_per_kg'] * 40) ?></div>
+                            <div class="rate-label">per Man</div>
                         <?php else: ?>
                             <span class="status-badge not-set"><i class="fas fa-times-circle me-1"></i> Not Set</span>
                             <div class="chicken-icon" style="color: #cbd5e0;"><i class="fas fa-drumstick"></i></div>
@@ -377,7 +379,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <tr>
                             <th>Date</th>
                             <th>Chicken Type</th>
-                            <th>Rate / KG</th>
+                            <th>Rate / Man</th>
                             <th>Set By</th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -396,7 +398,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                     <span class="fw-semibold"><?= htmlspecialchars($r['type_name']) ?></span>
                                 </td>
                                 <td>
-                                    <span class="rate-amount">Rs. <?= money($r['rate_per_kg']) ?></span>
+                                    <span class="rate-amount">Rs. <?= money($r['rate_per_kg'] * 40) ?></span>
                                 </td>
                                 <td>
                                     <span class="text-muted small">
@@ -409,7 +411,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                         <button type="button" class="btn-icon edit btn-edit-rate"
                                             data-id="<?= $r['id'] ?>"
                                             data-type="<?= htmlspecialchars($r['type_name']) ?>"
-                                            data-rate="<?= $r['rate_per_kg'] ?>"
+                                            data-rate="<?= $r['rate_per_kg'] * 40 ?>"
                                             data-date="<?= $r['rate_date'] ?>"
                                             title="Edit Rate">
                                             <i class="fas fa-pen"></i>
@@ -467,12 +469,12 @@ require_once __DIR__ . '/../../includes/header.php';
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Rate Per KG (Rs.) <span class="text-danger">*</span></label>
+                    <label class="form-label fw-semibold">Rate Per Man (Rs.) <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-2 border-end-0">Rs.</span>
-                        <input type="number" name="rate_per_kg" class="form-control form-control-lg" step="0.01" min="0" required placeholder="Enter rate" style="border-left:0; font-weight:600;">
+                        <input type="number" name="rate_per_man" class="form-control form-control-lg" step="0.01" min="0" required placeholder="Enter rate" style="border-left:0; font-weight:600;">
                     </div>
-                    <small class="text-muted">Enter the price per kilogram for this chicken type</small>
+                    <small class="text-muted">Enter rate per Man (1 Man = 40 KG)</small>
                 </div>
                 <div class="mb-0">
                     <label class="form-label fw-semibold">Effective Date</label>
@@ -504,10 +506,10 @@ require_once __DIR__ . '/../../includes/header.php';
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Rate Per KG (Rs.) <span class="text-danger">*</span></label>
+                    <label class="form-label fw-semibold">Rate Per Man (Rs.) <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-2 border-end-0">Rs.</span>
-                        <input type="number" name="rate_per_kg" id="edit_rate_per_kg" class="form-control form-control-lg" step="0.01" min="0" required style="border-left:0; font-weight:600;">
+                        <input type="number" name="rate_per_man" id="edit_rate_per_kg" class="form-control form-control-lg" step="0.01" min="0" required style="border-left:0; font-weight:600;">
                     </div>
                 </div>
                 <div class="mb-0">

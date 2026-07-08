@@ -61,10 +61,9 @@ $page_title = 'Invoice - ' . $sale['invoice_no'];
         <div class="card">
             <div class="card-body p-4">
                 <div class="text-center mb-4 pb-3" style="border-bottom: 2px solid #059669;">
-                    <h3 style="margin:0;font-weight:700;color:#059669;">Alwahab Poultry</h3>
-                    <p style="margin:2px 0;font-size:14px;">Add Qazia wah pul near Press club badin</p>
-                    <p style="margin:2px 0;font-size:14px;">Prop Sajid Wahla &bull; Manger Asif Memon</p>
-                    <p style="margin:2px 0;font-size:14px;">+92 333 2528003</p>
+                    <h3 style="margin:0;font-weight:700;color:#059669;">Ismail's Poultry Services</h3>
+                    <p style="margin:2px 0;font-size:14px;">Near Fruit Mandi Talagang Road Chakwal</p>
+                    <p style="margin:2px 0;font-size:14px;">0336 7507535</p>
                 </div>
                 <div class="row mb-4">
                     <div class="col-6">

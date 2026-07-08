@@ -328,8 +328,8 @@ require_once __DIR__ . '/../../includes/header.php';
                         <th class="text-end">Weight (KG)</th>
                         <th class="text-end">Rate/KG</th>
                         <th>Details / Notes</th>
-                        <th class="text-end">Debit (Rs.)</th>
                         <th class="text-end">Credit (Rs.)</th>
+                        <th class="text-end">Debit (Rs.)</th>
                         <th class="text-end">Balance (Rs.)</th>
                     </tr>
                 </thead>

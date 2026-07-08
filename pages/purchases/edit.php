@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $supplier_id     = (int)$_POST['supplier_id'];
     $chicken_type_id = (int)$_POST['chicken_type_id'];
     $invoice_no      = sanitize($_POST['invoice_no'] ?? '');
-    $total_birds     = (int)$_POST['total_birds'];
     $total_weight    = (float)$_POST['total_weight'];
     $purchase_rate   = (float)$_POST['purchase_rate'];
     $purchase_date   = $_POST['purchase_date'] ?: date('Y-m-d');
@@ -50,21 +49,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update purchase
         $stmt = $pdo->prepare("
             UPDATE purchases
-            SET supplier_id = ?, invoice_no = ?, total_birds = ?, total_weight = ?,
+            SET supplier_id = ?, invoice_no = ?, total_weight = ?,
                 purchase_rate = ?, total_cost = ?, purchase_date = ?, notes = ?
             WHERE id = ?
         ");
-        $stmt->execute([$supplier_id, $invoice_no, $total_birds, $total_weight, $purchase_rate, $total_cost, $purchase_date, $notes, $id]);
+        $stmt->execute([$supplier_id, $invoice_no, $total_weight, $purchase_rate, $total_cost, $purchase_date, $notes, $id]);
 
         // Update stock ledger entry
         $stmt = $pdo->prepare("
             UPDATE stock_ledger
-            SET transaction_date = ?, chicken_type_id = ?, birds_count = ?,
+            SET transaction_date = ?, chicken_type_id = ?,
                 weight_kg = ?, rate_per_kg = ?, amount = ?,
                 notes = ?
             WHERE reference_id = ? AND transaction_type = 'purchase'
         ");
-        $stmt->execute([$purchase_date, $chicken_type_id, $total_birds, $total_weight, $purchase_rate, $total_cost, 'Purchase: ' . ($invoice_no ?: 'N/A'), $id]);
+        $stmt->execute([$purchase_date, $chicken_type_id, $total_weight, $purchase_rate, $total_cost, 'Purchase: ' . ($invoice_no ?: 'N/A'), $id]);
 
         $pdo->commit();
         setFlash('success', 'Purchase updated successfully.');
@@ -138,18 +137,14 @@ require_once __DIR__ . '/../../includes/header.php';
                             <input type="text" name="invoice_no" class="form-control" value="<?= htmlspecialchars($purchase['invoice_no'] ?? '') ?>" placeholder="Optional">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold">Quantity (Birds)</label>
-                            <input type="number" name="total_birds" class="form-control" min="0" value="<?= (int)$purchase['total_birds'] ?>">
-                        </div>
-                        <div class="col-md-4">
                             <label class="form-label fw-semibold">Total Weight (KG) *</label>
                             <input type="number" name="total_weight" id="p_weight" class="form-control" step="0.001" min="0" required value="<?= $purchase['total_weight'] ?>">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Purchase Rate/KG (Rs.) *</label>
                             <input type="number" name="purchase_rate" id="p_rate" class="form-control" step="0.01" min="0" required value="<?= $purchase['purchase_rate'] ?>">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Total Cost (Auto)</label>
                             <input type="text" id="p_total" class="form-control bg-light" readonly value="<?= number_format($purchase['total_cost'], 2) ?>">
                         </div>

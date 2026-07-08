@@ -48,6 +48,7 @@ Vanilla PHP/MySQL POS. No Composer, no build step, no test runner, no CI, no `.h
   - `save_sale`: DB transaction (sale + stock_ledger + optional payment). Resolves `customer_id=0` to `'Walk-in Customer'`.
 - Stock check via `availableStock()` before sale (both server-side and client-side).
 - Invoice format: `INV-YYYYMMDD-NNNN` (NNNN = `MAX(sales.id)+1` global). Print via `sales/invoice.php?id=N`. Weight shown in KG and **Man** (1 Man = 40 KG).
+- **Chicken rates**: User enters rate per **Man** on the form; stored as `rate_per_kg` (÷40). Display always converts back (×40).
 
 ## Purchases
 
@@ -67,4 +68,4 @@ Custom: `assets/css/sb-admin-custom.css` (`--primary: #059669`), `assets/js/pos.
 
 ## Branding
 
-"Alwahab Poultry" — login page, print header, invoice. Store address in `header.php` inline CSS.
+"Ismail's Poultry Services" — login page, sidebar, print header, invoice. Address/phone in `header.php` and `invoice.php`.

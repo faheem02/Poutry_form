@@ -137,7 +137,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Amount (Rs.)</label>
-                            <input type="number" name="amount" class="form-control" step="0.01" min="0" value="0">
+                            <input type="number" name="amount" class="form-control" step="0.01" value="0">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Reason / Notes</label>
@@ -159,7 +159,7 @@ $(document).ready(function () {
         const $form = $(this).closest('form');
         const rate = parseFloat($(this).val()) || 0;
         const weight = parseFloat($form.find('[name="weight_kg"]').val()) || 0;
-        if (rate > 0 && weight > 0) {
+        if (rate > 0 && weight != 0) {
             $form.find('[name="amount"]').val((rate * weight).toFixed(2));
         }
     });
@@ -167,7 +167,7 @@ $(document).ready(function () {
         const $form = $(this).closest('form');
         const rate = parseFloat($form.find('[name="rate_per_kg"]').val()) || 0;
         const weight = parseFloat($(this).val()) || 0;
-        if (rate > 0 && weight > 0) {
+        if (rate > 0 && weight != 0) {
             $form.find('[name="amount"]').val((rate * weight).toFixed(2));
         }
     });

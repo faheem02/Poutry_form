@@ -18,7 +18,7 @@ $expanded  = function($exp) { return $exp ? 'true' : 'false'; };
             <div class="sidebar-brand-icon">
                 <i class="fas fa-drumstick-bite"></i>
             </div>
-            <div class="sidebar-brand-text mx-2">AL WAHAB POULTRY</div>
+            <div class="sidebar-brand-text mx-2">ISMAIL'S POULTRY</div>
         </a>
 
         <hr class="sidebar-divider my-0">
